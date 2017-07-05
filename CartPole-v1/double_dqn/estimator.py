@@ -43,11 +43,11 @@ class Estimator(object):
     def predict(self, session, states_batch):
         return session.run(self.predictions, feed_dict={self.input: states_batch})
 
-    def update(self, session, target_estimator, states_batch, actions_batch, rewards_batch, next_states_batch, done_batch):
+    def update(self, session, second_estimator, states_batch, actions_batch, rewards_batch, next_states_batch, done_batch):
         batch_size = states_batch.shape[0]
+        next_best_actions = session.run(self.predictions, feed_dict={self.input: next_states_batch})
 
-        next_q_values = session.run(target_estimator.output, feed_dict={target_estimator.input: next_states_batch})
-        max_target_q_values = next_q_values.max(axis=1)
+        next_q_values = session.run(second_estimator.output, feed_dict={second_estimator.input: next_states_batch})
 
         target_q_values = session.run(self.output, feed_dict={self.input: states_batch})
 
@@ -55,16 +55,6 @@ class Estimator(object):
             if done_batch[i]:
                 target_q_values[i, actions_batch[i]] = rewards_batch[i]
             else:
-                target_q_values[i, actions_batch[i]] = rewards_batch[i] + self.discount_factor * max_target_q_values[i]
+                target_q_values[i, actions_batch[i]] = rewards_batch[i] + self.discount_factor * next_q_values[i, next_best_actions[i]]
 
         session.run(self.train_step, feed_dict={self.input: states_batch, self.target_output: target_q_values})
-
-    def copy_model_from(self, session, other):
-        new_W1 = tf.assign(self.W1, other.W1)
-        new_b1 = tf.assign(self.b1, other.b1)
-        new_W2 = tf.assign(self.W2, other.W2)
-        new_b2 = tf.assign(self.b2, other.b2)
-        new_W3 = tf.assign(self.W3, other.W3)
-        new_b3 = tf.assign(self.b3, other.b3)
-
-        session.run([new_W1, new_b1, new_W2, new_b2, new_W3, new_b3])

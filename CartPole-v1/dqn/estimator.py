@@ -40,9 +40,6 @@ class Estimator(object):
             with tf.name_scope("train"):
                 self.train_step = tf.train.AdamOptimizer(0.001).minimize(self.loss)
 
-    def q_values(self, session, states_batch):
-        return session.run(self.output, feed_dict={self.input: states_batch})
-
     def predict(self, session, states_batch):
         return session.run(self.predictions, feed_dict={self.input: states_batch})
 
