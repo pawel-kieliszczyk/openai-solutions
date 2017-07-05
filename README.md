@@ -1,1 +1,1 @@
-# openai-solutions
+# OpenAI solutions
