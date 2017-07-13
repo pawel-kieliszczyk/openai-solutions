@@ -26,6 +26,8 @@ replay_memory = ReplayMemory(replay_memory_size)
 estimator_1 = Estimator(discount_factor, "estimator_1")
 estimator_2 = Estimator(discount_factor, "estimator_2")
 
+recent_timesteps = collections.deque(maxlen=100)
+
 
 global_step = 0
 
@@ -65,7 +67,8 @@ with tf.Session() as sess:
             global_step += 1
 
             if done:
-                print("Episode {} finished after {} timesteps".format(i_episode, t+1))
+                recent_timesteps.append(t+1)
+                print("Episode {} finished after {} timesteps (average {})".format(i_episode, t+1 , np.mean(recent_timesteps)))
                 break
 
             state = next_state
