@@ -13,7 +13,7 @@ env = gym.make('CartPole-v1')
 num_episodes = 3000
 
 random_action_probability_start = 0.99 # starting random action probability
-random_action_probability_end = 0.01 # ending random action probability
+random_action_probability_end = 0.1 # ending random action probability
 random_action_probability_decay = 0.99
 
 discount_factor = 0.99
@@ -37,11 +37,17 @@ with tf.Session() as sess:
 
     # initialize replay memory
     done = True
+    current_score = 0.0
     for _ in range(replay_memory_initial_size):
         if done:
+            current_score = 0.0
             state = env.reset()
+            state = np.append(state, [current_score])
         action = env.action_space.sample()
         next_state, reward, done, _ = env.step(action)
+
+        current_score += reward
+        next_state = np.append(next_state, [current_score])
 
         replay_memory.add(reward, (state, action, reward, next_state, done))
         state = next_state
@@ -49,6 +55,8 @@ with tf.Session() as sess:
 
     for i_episode in range(num_episodes):
         state = env.reset()
+        current_score = 0.0
+        state = np.append(state, [current_score])
 
         for t in range(500):
             env.render()
@@ -66,6 +74,9 @@ with tf.Session() as sess:
                 random_action_probability *= random_action_probability_decay
 
             next_state, reward, done, _ = env.step(action)
+
+            current_score += reward
+            next_state = np.append(next_state, [current_score])
 
             if global_step % 2 == 0:
                 error = estimator_1.td_errors(sess, estimator_2, [state], [action], [reward], [next_state])[0]
