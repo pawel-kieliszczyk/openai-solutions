@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-class ValueEstimator(object):
+class QEstimator(object):
     def __init__(self, discount_factor):
         self.discount_factor = discount_factor
         self._build_model()
