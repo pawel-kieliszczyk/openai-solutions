@@ -4,3 +4,4 @@ Implemented algorithms:
 * Deep Q-Learning
 * Double Deep Q-Learning
 * Double Deep Q-Learning with Prioritized Experience Replay
+* Monte-Carlo Policy Gradient (REINFORCE)
